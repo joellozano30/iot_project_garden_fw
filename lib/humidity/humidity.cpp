@@ -1,0 +1,18 @@
+#include "humidity.h"
+#include "Arduino.h"
+
+void humidity_init(){
+    pinMode(HUMIDITY_PIN,INPUT);
+}
+int calc_humidity(){
+    int humidity=analogRead(HUMIDITY_PIN);
+    return humidity;
+}
+
+float get_calc_percentage_humidity(){
+    int humidity_measured=calc_humidity();
+    float percentage_humidity=map(humidity_measured, HUMEDAD_AIRE, HUMEDAD_AGUA, 0, 100);
+    if(percentage_humidity>100)
+        percentage_humidity=100;
+    return percentage_humidity;
+}
