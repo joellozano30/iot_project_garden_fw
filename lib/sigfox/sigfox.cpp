@@ -237,7 +237,13 @@ void sigfoxParseResponse(String* buf_rx){
 
 // void sigfox_set_time(uint8_t hour, uint8_t minute, uint8_t second)
 // {
-
+void sigfox_enter_sleep_mode(void){
+    char txBuffer[20];
+    digitalWrite(SIGFOX_ENABLE, HIGH);
+    delay(1000);
+    sigfoxSendATCommand("AT$P=1");
+    delay(1000);
+}
 
 
 // }

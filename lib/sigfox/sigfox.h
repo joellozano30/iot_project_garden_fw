@@ -27,5 +27,6 @@ void sigfoxSendMsg(String buf_tx);
 void sigfoxSendBidirMsg(String buf_tx, String buf_rx);
 void sigfoxReadResponse(String buf_rx);
 void sigfoxParseResponse(String buf_rx);
+void sigfox_enter_sleep_mode(void);
 
 #endif

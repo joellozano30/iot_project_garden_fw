@@ -53,6 +53,7 @@ void setup() {
   randomSeed(analogRead(A0));
   Serial.println("[*] Finish Setup!"); 
   //Serial.print(start_time); 
+  sigfox_enter_sleep_mode();
 }
 
 void loop() {
@@ -69,7 +70,7 @@ void loop() {
     Serial.println("[*] Calculating Parameters: ");
     humidity_floor+=get_calc_percentage_humidity();
     //temperature+=get_temperature();
-
+    Serial.print("[*] Humidity: ");
     Serial.println(get_calc_percentage_humidity());
     start_time2 = millis();
     num_data++;
@@ -81,26 +82,28 @@ void loop() {
     Serial.println("[*] Inside Sigfox Window\r\n");    
     rtc_set_tx_flag(false);
 
-    humidity_to_send = humidity_floor/num_data; //mean
-    temperature_to_send = temperature/num_data; //mean
+    sigfoxInit();
+
+    humidity_to_send = humidity_floor/(float)num_data; //mean
+    temperature_to_send = temperature/(float)num_data; //mean
+
+    Serial.print("[*] Humidity average: ");
+    Serial.println(humidity_to_send);
+
     mainSendSigfoxMessage(UNIDIR_MSG);
     num_data = 0;
+    humidity_floor = 0;
+    temperature = 0;
+    sigfox_enter_sleep_mode();
   }
 
-  // if((millis()-start_time)>ONE_SECOND){
-  //   Serial.println("[*] One second passed!"); 
-  //   // rtc_handler();
-  //   // rtc_get_time(&dts);
-  //   // rtc_show_time();
-  //   start_time = millis();
-  // }
 }
 
 void mainSendSigfoxMessage(sigfox_msg_type msgType){
 
   sigfoxPackMsg(humidity_to_send, temperature_to_send, battery_to_send, &msgBuffer);
   Serial.print("[!] Message to Send: "); 
-  Serial.print(msgBuffer); 
+  Serial.println(msgBuffer); 
   
   if(msgType == UNIDIR_MSG){
     sigfoxSendMsg(msgBuffer);
