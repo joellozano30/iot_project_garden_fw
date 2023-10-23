@@ -1,6 +1,6 @@
 #pragma once
 
-#define HUMIDITY_PIN 22
+#define HUMIDITY_PIN A1
 #define HUMEDAD_AIRE 550 
 #define HUMEDAD_AGUA 250
 

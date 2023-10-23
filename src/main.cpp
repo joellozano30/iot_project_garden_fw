@@ -27,7 +27,7 @@ void mainSendSigfoxMessage(sigfox_msg_type msgType);
 void setup() {
 
   Serial.begin(9600);
-  //humidity_init();
+  humidity_init();
   //temperature_init();
   Serial.println("[*] Hello!"); 
   Serial.println("[*] Starting Sigfox Configuration"); 
@@ -65,12 +65,15 @@ void loop() {
     start_time = millis();
   }
 
-  // if((millis()-start_time2)>FIVE_SECONDS){
-  //   humidity_floor+=get_calc_percentage_humidity();
-  //   //temperature+=get_temperature();
-  //   start_time2 = millis();
-  //   num_data++;
-  // }
+  if((millis()-start_time2)>FIVE_SECONDS){
+    Serial.println("[*] Calculating Parameters: ");
+    humidity_floor+=get_calc_percentage_humidity();
+    //temperature+=get_temperature();
+
+    Serial.println(get_calc_percentage_humidity());
+    start_time2 = millis();
+    num_data++;
+  }
 
   if(rtc_get_tx_flag())
   {
