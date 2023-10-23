@@ -32,17 +32,17 @@ void setup() {
 
   sigfoxInit();
   delay(2000);
-  sigfoxReadInfo();
+  //sigfoxReadInfo();
   delay(1000);
 
-  humidity_to_send = 45.75;
-  temperature_to_send = 26.73;
-  battery_to_send = 80;
+  // humidity_to_send = 45.75;
+  // temperature_to_send = 26.73;
+  // battery_to_send = 80;
 
-  Serial.println("[*] Starting Pack Message"); 
-  sigfoxPackMsg(humidity_to_send, temperature_to_send, battery_to_send, &msgBuffer);
-  Serial.println("[*] Sending Message"); 
-  sigfoxSendMsg(msgBuffer);
+  // Serial.println("[*] Starting Pack Message"); 
+  // sigfoxPackMsg(humidity_to_send, temperature_to_send, battery_to_send, &msgBuffer);
+  // Serial.println("[*] Sending Message"); 
+  // sigfoxSendMsg(msgBuffer);
 
   // sigfoxSendATCommand("AT");
   // sigfoxSendATCommand("AT$I=10");

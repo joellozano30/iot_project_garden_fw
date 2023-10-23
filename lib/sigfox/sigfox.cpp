@@ -4,12 +4,14 @@ char sigfoxRxBuffer[50] = {0};
 char sigfoxID[51] = {0};
 char sigfoxPAC[51] = {0};
 
-SoftwareSerial mySerial(0, 1); // RX, TX
+HardwareSerial MySerial(2); // definir un Serial para UART1
+const int MySerialRX = 16;
+const int MySerialTX = 17;
 
 void sigfoxInit(void)
 {
-    //Serial1.begin(9600, SERIAL_8N1, 4, 2);
-    mySerial.begin(9600);
+    MySerial.begin(9600, SERIAL_8N1, MySerialRX, MySerialTX);
+    //Serial1.begin(9600, SERIAL_8N1);
     pinMode(SIGFOX_ENABLE, OUTPUT);
     digitalWrite(SIGFOX_ENABLE, LOW);
     sigfoxChangeToRegion4();
@@ -20,14 +22,14 @@ void sigfoxChangeToRegion4(void)
     digitalWrite(SIGFOX_ENABLE, HIGH);
     delay(1000);
 
-    Serial.print("AT$DR=922300000");
-    Serial.print("\r\n");
-    Serial.print("ATS400=<00000000><F0000000><0000001F>,63");
-    Serial.print("\r\n");
-    Serial.print("AT$WR");
-    Serial.print("\r\n");
-    Serial.print("AT$RC");
-    Serial.print("\r\n");
+    MySerial.print("AT$DR=922300000");
+    MySerial.print("\r\n");
+    MySerial.print("ATS400=<00000000><F0000000><0000001F>,63");
+    MySerial.print("\r\n");
+    MySerial.print("AT$WR");
+    MySerial.print("\r\n");
+    MySerial.print("AT$RC");
+    MySerial.print("\r\n");
 
     delay(1000);
     
@@ -61,16 +63,20 @@ void sigfoxSendATCommand(char* comandoAT)
 {
   unsigned long x=0;
 
-  while( Serial.available() > 0) Serial.read();
+  while( Serial1.available() > 0) Serial1.read();
     x = 0;
   memset(sigfoxRxBuffer, '\0',sizeof(sigfoxRxBuffer)); 
-  Serial.print(comandoAT);
-  Serial.print("\r\n");
+
+  Serial.println(comandoAT);
+
+  Serial2.print(comandoAT);
+  Serial2.print("\r\n");
   while(true)
   {
-    if(Serial.available() != 0)
+    Serial.println("Reading ... ");
+    if(Serial2.available() != 0)
     {   
-      sigfoxRxBuffer[x] = Serial.read();
+      sigfoxRxBuffer[x] = Serial2.read();
       x++;
       if (strstr(sigfoxRxBuffer, "\n") != NULL)
       {
@@ -148,11 +154,11 @@ void sigfoxSendMsg(String buf_tx)
     delay(1000);
 
     //Channel reset to ensure correct frequency
-    Serial.print("AT$RC\n");
+    Serial2.print("AT$RC\n");
     
     //******************************
     //Sending data on Sigfox
-    Serial.print(buf_tx);
+    Serial2.print(buf_tx);
 
     #ifdef SIGFOX_DEBUG
         #ifndef TEST
@@ -176,26 +182,26 @@ void sigfoxSendBidirMsg(String buf_tx, String buf_rx){
     delay(1000);
 
     //Reset channel to ensure correct frequency
-    Serial.print("AT$RC\n");
+    Serial2.print("AT$RC\n");
     
     //*****************************************
     //Sending data to Sigfox
-    Serial.print(buf_tx);
+    Serial2.print(buf_tx);
 
-    sigfox_read_response(buf_rx);
+    sigfoxReadResponse(buf_rx);
 
     digitalWrite(SIGFOX_ENABLE, LOW);
 }
 
-void sigfox_read_response(String buf_rx){
+void sigfoxReadResponse(String buf_rx){
   int idx = 0;
   uint32_t start_time = millis();
 
   while(true)
   {
-    if(Serial.available() > 0)
+    if(Serial1.available() > 0)
     {
-      buf_rx[idx] = Serial.read();
+      buf_rx[idx] = Serial1.read();
       idx++;
     }
     if((millis() - start_time) > SEVENTY_FIVE_SECONDS)
