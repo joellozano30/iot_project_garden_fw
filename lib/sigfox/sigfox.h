@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 #include <SoftwareSerial.h>
+#include <Time.h>
+#include <TimeLib.h>
 
 #define SIGFOX_RX D7
 #define SIGFOX_TX D8
@@ -23,6 +25,7 @@ void sigfoxSendATCommand(char* comandoAT);
 void sigfoxPackMsg(float humidity, float temperature, float battery, String *dataMsg);
 void sigfoxSendMsg(String buf_tx);
 void sigfoxSendBidirMsg(String buf_tx, String buf_rx);
+void sigfoxReadResponse(String buf_rx);
 void sigfoxParseResponse(String buf_rx);
 
 #endif

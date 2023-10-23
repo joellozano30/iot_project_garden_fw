@@ -182,12 +182,15 @@ void sigfoxSendBidirMsg(String buf_tx, String buf_rx){
     //Sending data to Sigfox
     Serial.print(buf_tx);
 
-    sigfox_read_response(buf_rx);
+    sigfoxReadResponse(buf_rx);
 
     digitalWrite(SIGFOX_ENABLE, LOW);
+
+    Serial.println("Response: ");
+    Serial.println(buf_rx);
 }
 
-void sigfox_read_response(String buf_rx){
+void sigfoxReadResponse(String *buf_rx){
   int idx = 0;
   uint32_t start_time = millis();
 
@@ -207,6 +210,37 @@ void sigfox_read_response(String buf_rx){
   }
 }
 
+void sigfoxParseResponse(String* buf_rx){
+
+  uint8_t command_type = 0;
+  char *end_hour, *end_minute;
+
+  if(strstr((char*)buf_rx, "RX=") == NULL)
+    {
+        Serial.print("[!] No valid downlink frame found, returning null\r\n");
+        return;
+    }
+
+  char *p_str = strstr((char*)buf_rx, "RX=") + 3;
+  command_type = (int)strtol(p_str, NULL, 16);
+
+  if(command_type == 1){
+    uint8_t hour = (uint8_t)strtol(p_str + 3, &end_hour, 10);   
+    uint8_t minute = (uint8_t)strtol(p_str + 6, &end_minute, 10);
+    uint8_t second = 59;
+
+    setTime(hour,minute,second,1,1,2020);
+  }
+
+
+}
+
+// void sigfox_set_time(uint8_t hour, uint8_t minute, uint8_t second)
+// {
+
+
+
+// }
 // void sigfoxSendMsg(String sigfoxTxBuffer)
 // {
 //     // Adding newline to message
