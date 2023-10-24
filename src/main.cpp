@@ -7,6 +7,7 @@
 
 #define RX_BUFFER_SIZE 100
 #define FIVE_SECONDS 5000
+#define ONE_MINUTE 60000UL
 #define ONE_SECOND 1000UL
 
 datetimeStruct dts;
@@ -28,8 +29,7 @@ void setup() {
 
   Serial.begin(9600);
   humidity_init();
-  //temperature_init();
-  Serial.println("[*] Hello!"); 
+  Serial.println("[*] Hello manito!"); 
   Serial.println("[*] Starting Sigfox Configuration"); 
 
   rtc_init();
@@ -38,38 +38,33 @@ void setup() {
   sigfoxReadInfo();
   delay(1000);
 
-  humidity_to_send = 50;
-  temperature_to_send = 50;
-  battery_to_send = 50;
+  humidity_to_send = 0;
+  temperature_to_send = 0;
+  battery_to_send = 0;
 
-  Serial.println("[*] Starting Pack Message"); 
-  sigfoxPackMsg(humidity_to_send, temperature_to_send, battery_to_send, &msgBuffer);
-  Serial.println("[*] Sending Message"); 
-  sigfoxSendMsg(msgBuffer);
+  mainSendSigfoxMessage(BIDIR_MSG);
 
   start_time = millis();
   start_time2 = millis();
 
   randomSeed(analogRead(A0));
   Serial.println("[*] Finish Setup!"); 
-  //Serial.print(start_time); 
   sigfox_enter_sleep_mode();
 }
 
 void loop() {
-  //Serial.println("[*] Start loop!"); 
+
   if((millis()-start_time) > ONE_SECOND){
-    //Serial.println("[*] One second passed!"); 
     rtc_handler();
-    // rtc_get_time(&dts);
     rtc_show_time();
     start_time = millis();
   }
 
-  if((millis()-start_time2)>FIVE_SECONDS){
+  if((millis()-start_time2)>ONE_MINUTE){
     Serial.println("[*] Calculating Parameters: ");
     humidity_floor+=get_calc_percentage_humidity();
     //temperature+=get_temperature();
+    //
     Serial.print("[*] Humidity: ");
     Serial.println(get_calc_percentage_humidity());
     start_time2 = millis();
@@ -81,16 +76,18 @@ void loop() {
       //serial1_printConstStr("[*] Inside Sigfox Window\r\n");  
     Serial.println("[*] Inside Sigfox Window\r\n");    
     rtc_set_tx_flag(false);
-
     sigfoxInit();
-
     humidity_to_send = humidity_floor/(float)num_data; //mean
     temperature_to_send = temperature/(float)num_data; //mean
 
     Serial.print("[*] Humidity average: ");
     Serial.println(humidity_to_send);
 
-    mainSendSigfoxMessage(UNIDIR_MSG);
+    if(sx_get_dwnrec_flag())
+      mainSendSigfoxMessage(UNIDIR_MSG);
+    else 
+      mainSendSigfoxMessage(BIDIR_MSG);
+
     num_data = 0;
     humidity_floor = 0;
     temperature = 0;
@@ -108,10 +105,10 @@ void mainSendSigfoxMessage(sigfox_msg_type msgType){
   if(msgType == UNIDIR_MSG){
     sigfoxSendMsg(msgBuffer);
   }
-  // else if(msgType == BIDIR_MSG)
-  // {
-  //   sigfoxSendBidirMsg(msgBuffer, rxBuffer);
-  //   sigfoxParseResponse(rxBuffer);
-  // }
+  else if(msgType == BIDIR_MSG)
+  {
+    sigfoxSendBidirMsg(msgBuffer, rxBuffer);
+    sigfoxParseResponse(rxBuffer);
+  }
 
 }

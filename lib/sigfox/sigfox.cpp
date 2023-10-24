@@ -1,5 +1,6 @@
 #include "sigfox.h"
 
+uint8_t DwnRecFlag = false;
 char sigfoxRxBuffer[50] = {0};
 char sigfoxID[51] = {0};
 char sigfoxPAC[51] = {0};
@@ -165,7 +166,7 @@ void sigfoxSendMsg(String buf_tx)
     digitalWrite(SIGFOX_ENABLE, LOW);
 }
 
-void sigfoxSendBidirMsg(String buf_tx, String buf_rx){
+void sigfoxSendBidirMsg(String buf_tx, char *buf_rx){
 
     //Add downlink indicator and line break \n
     buf_tx += ",1\n";
@@ -175,9 +176,13 @@ void sigfoxSendBidirMsg(String buf_tx, String buf_rx){
     digitalWrite(SIGFOX_ENABLE, HIGH);
     delay(1000);
 
+    while(Serial.available() > 0)
+        Serial.read();
+
     //Reset channel to ensure correct frequency
     Serial.print("AT$RC\n");
     
+    delay(1000);
     //*****************************************
     //Sending data to Sigfox
     Serial.print(buf_tx);
@@ -190,7 +195,7 @@ void sigfoxSendBidirMsg(String buf_tx, String buf_rx){
     Serial.println(buf_rx);
 }
 
-void sigfoxReadResponse(String *buf_rx){
+void sigfoxReadResponse(char *buf_rx){
   int idx = 0;
   uint32_t start_time = millis();
 
@@ -201,7 +206,7 @@ void sigfoxReadResponse(String *buf_rx){
       buf_rx[idx] = Serial.read();
       idx++;
     }
-    if((millis() - start_time) > SEVENTY_FIVE_SECONDS)
+    if((millis() - start_time) > FIFTY_SECONDS)
     {
       break;
     }
@@ -210,35 +215,58 @@ void sigfoxReadResponse(String *buf_rx){
   }
 }
 
-void sigfoxParseResponse(String* buf_rx){
+void sigfoxParseResponse(char* buf_rx){
+  char output[9];
+  int inputIndex = 0;
+  int outputIndex = 0;
 
-  uint8_t command_type = 0;
-  char *end_hour, *end_minute;
-
-  if(strstr((char*)buf_rx, "RX=") == NULL)
-    {
-        Serial.print("[!] No valid downlink frame found, returning null\r\n");
-        return;
-    }
-
-  char *p_str = strstr((char*)buf_rx, "RX=") + 3;
-  command_type = (int)strtol(p_str, NULL, 16);
-
-  if(command_type == 1){
-    uint8_t hour = (uint8_t)strtol(p_str + 3, &end_hour, 10);   
-    uint8_t minute = (uint8_t)strtol(p_str + 6, &end_minute, 10);
-    uint8_t second = 59;
-
-    setTime(hour,minute,second,1,1,2020);
+   if(strstr(buf_rx, "RX=") == NULL)
+  {
+      Serial.print("[!] No valid downlink frame found, returning null\r\n");
+      return;
   }
 
+  sx_set_dwnrec_flag(true);
+
+  while (buf_rx[inputIndex] != '\0' && buf_rx[inputIndex] != '=') {
+    inputIndex++;
+  }
+
+  inputIndex++;
+
+  while (buf_rx[inputIndex] != '\0' && outputIndex < 8) {
+    if (buf_rx[inputIndex] != ' ') {
+      output[outputIndex] = buf_rx[inputIndex];
+      outputIndex++;
+    }
+    inputIndex++;
+  }
+
+  output[outputIndex] = '\0';
+
+  unsigned long epochTime = strtoul(output, NULL, 16);
+  epochTime = epochTime-18000;
+
+  Serial.print("Epoch time: ");
+  Serial.println(epochTime);
+
+  tmElements_t currentTime;
+  breakTime(epochTime, currentTime);
+
+  // Imprimir la hora, minutos y segundos
+  Serial.print("Hora recibida: ");
+  Serial.print(currentTime.Hour);
+  Serial.print(":");
+  Serial.print(currentTime.Minute);
+  Serial.print(":");
+  Serial.println(currentTime.Second);
+
+  setTime(currentTime.Hour,currentTime.Minute,currentTime.Second,1,1,2020);
 
 }
 
-// void sigfox_set_time(uint8_t hour, uint8_t minute, uint8_t second)
-// {
 void sigfox_enter_sleep_mode(void){
-    char txBuffer[20];
+
     digitalWrite(SIGFOX_ENABLE, HIGH);
     delay(1000);
     sigfoxSendATCommand("AT$P=1");
@@ -246,34 +274,12 @@ void sigfox_enter_sleep_mode(void){
 }
 
 
-// }
-// void sigfoxSendMsg(String sigfoxTxBuffer)
-// {
-//     // Adding newline to message
-//     sigfoxTxBuffer += "\n";
+void sx_set_dwnrec_flag(uint8_t val)
+{
+    DwnRecFlag = val;
+}
 
-//     //**************************
-//     // Enabling Sigfox module
-//     digitalWrite(SIGFOX_ENABLE, HIGH);
-//     delay(1000);
-
-//     // Reset channel to ensure that message is sent in the right frequency
-//     #ifdef SIGFOX_DEBUG
-//         Serial.print("AT$RC\n");
-//     #endif
-//     Serial1.print("AT$RC\n");
-
-//     //**************************
-//     // Sending the message via Sigfox
-//     #ifdef SIGFOX_DEBUG
-//         Serial.print(sigfoxTxBuffer);
-//     #endif
-//     Serial1.print(sigfoxTxBuffer);
-//     delay(3000);
-//     // Disabling Sigfox module
-//     digitalWrite(SIGFOX_ENABLE, LOW);
-
-//     // Flushing the buffer
-//     while(Serial1.available() > 0)
-//         Serial1.read();
-// }
+uint8_t sx_get_dwnrec_flag(void)
+{
+    return DwnRecFlag;
+}

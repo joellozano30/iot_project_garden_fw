@@ -11,6 +11,7 @@
 
 #define SIGFOX_ENABLE 7
 #define SEVENTY_FIVE_SECONDS 75000UL
+#define FIFTY_SECONDS 50000UL
 
 typedef enum
 {
@@ -24,9 +25,11 @@ void sigfoxReadInfo(void);
 void sigfoxSendATCommand(char* comandoAT);
 void sigfoxPackMsg(float humidity, float temperature, float battery, String *dataMsg);
 void sigfoxSendMsg(String buf_tx);
-void sigfoxSendBidirMsg(String buf_tx, String buf_rx);
-void sigfoxReadResponse(String buf_rx);
-void sigfoxParseResponse(String buf_rx);
+void sigfoxSendBidirMsg(String buf_tx, char *buf_rx);
+void sigfoxReadResponse(char *buf_rx);
+void sigfoxParseResponse(char* buf_rx);
 void sigfox_enter_sleep_mode(void);
+void sx_set_dwnrec_flag(uint8_t val);
+uint8_t sx_get_dwnrec_flag(void);
 
 #endif
