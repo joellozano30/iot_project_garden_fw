@@ -17,6 +17,4 @@
 //     if (isnan(hum)) {
 //         Serial.println(F("Failed to read humidity!"));
 //         return 0;
-//     }
-//     return hum;
-// }
+ga
