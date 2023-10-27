@@ -1,20 +1,24 @@
-// #include "temperature.h"
+#include "temperature.h"
+#include "SHT31.h"
+#include "Wire.h"
 
-// void temperature_init(){
-//     dht_sensor.begin();
-// }
+SHT31 sht;
 
-// float get_temperature(){
-//     float temp=dht_sensor.readTemperature(); //Envinromental
-//     if (isnan(temp)) {
-//         Serial.println(F("Failed to read temperature!"));
-//         return 0;
-//     }
-//     return temp;
-// }
-// float get_humidity(){
-//     float hum=dht_sensor.readHumidity(); //Environmental
-//     if (isnan(hum)) {
-//         Serial.println(F("Failed to read humidity!"));
-//         return 0;
-ga
+void sht_init()
+{
+    Wire.begin();
+    sht.begin(SHT31_ADDRESS);
+    Wire.setClock(100000);
+}
+
+float get_calc_percentage_humidity()
+{
+
+    sht.read();
+
+    // Aplicar correcciones de calibración
+    float temperaturaCalibrada = sht.getTemperature() + offsetTemperatura;
+
+    delay(100);
+    return temperaturaCalibrada;
+}

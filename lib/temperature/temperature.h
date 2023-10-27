@@ -1,11 +1,7 @@
-// #pragma once
+#pragma once
 
-// #include "DHT.h"
-// #define DHTPIN 2 //Digital Pin
-// #define DHTTYPE DHT11
+#define SHT31_ADDRESS 0x44
+#define offsetTemperatura 0
 
-// DHT dht_sensor(DHTPIN, DHTTYPE);
-
-// void temperature_init(void);
-// float get_temperature(void);
-// float get_humidity(void);
+void sht_init(void);
+float get_calc_percentage_humidity(void);
