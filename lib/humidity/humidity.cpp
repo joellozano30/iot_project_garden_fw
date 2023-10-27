@@ -11,7 +11,7 @@ int calc_humidity(){
 
 float get_calc_percentage_humidity(){
     int humidity_measured=calc_humidity();
-    float percentage_humidity=map(humidity_measured, HUMEDAD_AIRE, HUMEDAD_AGUA, 0, 100);
+    float percentage_humidity=map((long)humidity_measured, HUMEDAD_TIERRA, HUMEDAD_AGUA, 0, 100);
     if(percentage_humidity>100)
         percentage_humidity=100;
     return percentage_humidity;
