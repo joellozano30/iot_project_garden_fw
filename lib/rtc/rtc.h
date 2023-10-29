@@ -1,10 +1,15 @@
 #ifndef RTC_H
 #define RTC_H
 
+#ifndef TEST
 #include <Arduino.h>
 //#include "stdlib.h"
 #include <Time.h>
 #include <TimeLib.h>
+#else
+#include <ArduinoFake.h>
+#include <Time.h>
+#endif
 
 #define USE_TRANSMISSION_PERIOD_DEFINE
 #define TRANSMISSION_CODE 30

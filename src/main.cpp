@@ -1,8 +1,12 @@
-#include <Arduino.h>
-//#include <SoftwareSerial.h>
+#ifndef TEST
+  #include <Arduino.h>
+#else
+  #include <ArduinoFake.h>
+#endif 
+
 #include "sigfox.h"
-#include "humidity.h"
 #include "temperature.h"
+#include "humidity.h"
 #include "rtc.h"
 
 #define RX_BUFFER_SIZE 100
@@ -14,14 +18,16 @@ datetimeStruct dts;
 
 String msgBuffer = "";
 char rxBuffer[RX_BUFFER_SIZE] = {'\0'};
-unsigned long start_time;
-unsigned long start_time2;
+uint32_t start_time;
+uint32_t start_time2;
 int num_data = 0;
 float humidity_floor = 0;
 float temperature = 0;
 float humidity_to_send = 0;
 float temperature_to_send = 0;
 float battery_to_send = 0;
+float humidity_floor_print = 0;
+float temperature_print = 0;
 
 void mainSendSigfoxMessage(sigfox_msg_type msgType);
 
@@ -29,6 +35,7 @@ void setup() {
 
   Serial.begin(9600);
   humidity_init();
+  sht_init();
   Serial.println("[*] Hello manito!"); 
   Serial.println("[*] Starting Sigfox Configuration"); 
 
@@ -60,28 +67,32 @@ void loop() {
     start_time = millis();
   }
 
-  if((millis()-start_time2)>ONE_MINUTE){
+  if((millis()-start_time2) > ONE_MINUTE){
     Serial.println("[*] Calculating Parameters: ");
-    humidity_floor+=get_calc_percentage_humidity();
-    //temperature+=get_temperature();
-    //
+    humidity_floor_print = get_calc_percentage_humidity();
+    temperature_print = get_temperature();
+    humidity_floor+= humidity_floor_print;
+    temperature+=temperature_print;
     Serial.print("[*] Humidity: ");
-    Serial.println(get_calc_percentage_humidity());
+    Serial.println(humidity_floor_print);
+    Serial.print("[*] Temperature: ");
+    Serial.println(temperature_print);
     start_time2 = millis();
     num_data++;
   }
 
   if(rtc_get_tx_flag())
   {
-      //serial1_printConstStr("[*] Inside Sigfox Window\r\n");  
     Serial.println("[*] Inside Sigfox Window\r\n");    
     rtc_set_tx_flag(false);
     sigfoxInit();
-    humidity_to_send = humidity_floor/(float)num_data; //mean
-    temperature_to_send = temperature/(float)num_data; //mean
+    humidity_to_send = (uint16_t)humidity_floor/(float)num_data; //mean
+    temperature_to_send = (uint16_t)temperature/(float)num_data; //mean
 
     Serial.print("[*] Humidity average: ");
     Serial.println(humidity_to_send);
+    Serial.print("[*] Temperature average: ");
+    Serial.println(temperature_to_send);
 
     if(sx_get_dwnrec_flag())
       mainSendSigfoxMessage(UNIDIR_MSG);
@@ -112,3 +123,13 @@ void mainSendSigfoxMessage(sigfox_msg_type msgType){
   }
 
 }
+
+#ifdef TEST
+int main(){
+  setup();
+
+  while(1){
+    loop();
+  }
+}
+#endif

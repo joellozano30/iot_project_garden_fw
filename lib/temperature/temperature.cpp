@@ -1,24 +1,31 @@
 #include "temperature.h"
-#include "SHT31.h"
-#include "Wire.h"
-
-SHT31 sht;
 
 void sht_init()
 {
     Wire.begin();
-    sht.begin(SHT31_ADDRESS);
+    #ifndef TEST
+        sht.begin(SHT31_ADDRESS);
+    #else
+        //sht_begin();
+    #endif
+    
     Wire.setClock(100000);
 }
 
-float get_calc_percentage_humidity()
+float get_temperature()
 {
-
-    sht.read();
+    #ifndef TEST
+        sht.read();
+    #else
+        //sht_read();
+    #endif
 
     // Aplicar correcciones de calibración
+    #ifndef TEST
     float temperaturaCalibrada = sht.getTemperature() + offsetTemperatura;
+    #else   
+    float temperaturaCalibrada = /*sht_getTemperature() + */offsetTemperatura;
+    #endif
 
-    delay(100);
     return temperaturaCalibrada;
 }

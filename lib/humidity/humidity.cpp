@@ -1,5 +1,4 @@
 #include "humidity.h"
-#include "Arduino.h"
 
 void humidity_init(){
     pinMode(HUMIDITY_PIN,INPUT);

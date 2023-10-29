@@ -1,5 +1,12 @@
 #pragma once
 
+#ifndef TEST
+    #include "Arduino.h"
+#else
+    #include <ArduinoFake.h>
+    using namespace fakeit;
+#endif
+
 #define HUMIDITY_PIN A1
 #define HUMEDAD_TIERRA 117  
 #define HUMEDAD_AGUA 384

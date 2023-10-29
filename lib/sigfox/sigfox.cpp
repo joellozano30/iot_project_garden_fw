@@ -5,12 +5,17 @@ char sigfoxRxBuffer[50] = {0};
 char sigfoxID[51] = {0};
 char sigfoxPAC[51] = {0};
 
+#ifndef TEST
 SoftwareSerial mySerial(0, 1); // RX, TX
+#endif
 
 void sigfoxInit(void)
 {
-    //Serial1.begin(9600, SERIAL_8N1, 4, 2);
-    mySerial.begin(9600);
+    #ifndef TEST
+      mySerial.begin(9600);
+    #else
+      Serial.begin(9600);
+    #endif
     pinMode(SIGFOX_ENABLE, OUTPUT);
     digitalWrite(SIGFOX_ENABLE, LOW);
     sigfoxChangeToRegion4();
@@ -250,6 +255,7 @@ void sigfoxParseResponse(char* buf_rx){
   Serial.print("Epoch time: ");
   Serial.println(epochTime);
 
+  #ifndef TEST
   tmElements_t currentTime;
   breakTime(epochTime, currentTime);
 
@@ -262,6 +268,7 @@ void sigfoxParseResponse(char* buf_rx){
   Serial.println(currentTime.Second);
 
   setTime(currentTime.Hour,currentTime.Minute,currentTime.Second,1,1,2020);
+  #endif
 
 }
 

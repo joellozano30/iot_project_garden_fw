@@ -116,9 +116,11 @@ void rtc_print_alarm_struct(alarmConfigStruct dts)
 }
 
 void rtc_get_time(datetimeStruct *dt){
+    #ifndef TEST
     dt->hour = hour();
     dt->minute = minute();
     dt->second = second();
+    #endif
 }
 
 void rtc_show_time(void){

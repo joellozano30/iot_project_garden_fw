@@ -1,10 +1,15 @@
 #ifndef SIGFOX_H
 #define SIGFOX_H
 
-#include <Arduino.h>
-#include <SoftwareSerial.h>
-#include <Time.h>
-#include <TimeLib.h>
+#ifndef TEST
+    #include <Arduino.h>
+    #include <SoftwareSerial.h>
+    #include <Time.h>
+    #include <TimeLib.h>
+#else
+    #include "ArduinoFake.h"
+    using namespace fakeit;
+#endif
 
 #define SIGFOX_RX D7
 #define SIGFOX_TX D8
