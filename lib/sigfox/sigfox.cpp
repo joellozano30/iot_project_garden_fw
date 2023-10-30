@@ -140,7 +140,9 @@ void sigfoxPackMsg(float humidity, float temperature, float battery, String *dat
         *dataMsg += newBatByte;
     }
 
-    Serial.print("[*] Sigfox message: "); Serial.println(*dataMsg);
+    #ifndef TEST
+      Serial.print("[*] Sigfox message: "); Serial.println(*dataMsg);
+    #endif
 }
 
 void sigfoxSendMsg(String buf_tx)
@@ -225,7 +227,7 @@ void sigfoxParseResponse(char* buf_rx){
   int inputIndex = 0;
   int outputIndex = 0;
 
-   if(strstr(buf_rx, "RX=") == NULL)
+  if(strstr(buf_rx, "RX=") == NULL)
   {
       Serial.print("[!] No valid downlink frame found, returning null\r\n");
       return;
@@ -266,7 +268,6 @@ void sigfoxParseResponse(char* buf_rx){
   Serial.print(currentTime.Minute);
   Serial.print(":");
   Serial.println(currentTime.Second);
-
   setTime(currentTime.Hour,currentTime.Minute,currentTime.Second,1,1,2020);
   #endif
 

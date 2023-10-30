@@ -34,9 +34,13 @@ uint8_t rtc_check_if_time_to_send(void)
     rtc_get_time(&dts);
     if((dts.minute % compareVal == 0) && !checkFlag)
     {
+        #ifndef TEST
         rtc_get_random_time_to_send(&minInc, &secInc);
+        #endif
         rtc_calc_new_alarm_vals(&txTimeMarker, (alarmConfigStruct){0, minInc, secInc});
+        #ifndef TEST
         rtc_print_alarm_struct(txTimeMarker);
+        #endif
         checkFlag = true;
         return true;
     }
@@ -95,7 +99,7 @@ void rtc_get_random_time_to_send(uint8_t *minuteIncrement, uint8_t *secondIncrem
     #else
     *secondIncrement = 10;
     *minuteIncrement = 0;
-#endif
+    #endif
 
     Serial.print("[*] Random Value for minutes: ");
     Serial.println((uint16_t)*minuteIncrement);
@@ -104,9 +108,7 @@ void rtc_get_random_time_to_send(uint8_t *minuteIncrement, uint8_t *secondIncrem
 }
 
 void rtc_print_alarm_struct(alarmConfigStruct dts)
-{
-    //uint8_t txBuffer[20];
-    
+{    
     Serial.print("[*] SE ENVIARA A LAS -> ");
     Serial.print(dts.hours);
     Serial.print(":");
@@ -120,6 +122,10 @@ void rtc_get_time(datetimeStruct *dt){
     dt->hour = hour();
     dt->minute = minute();
     dt->second = second();
+    #else 
+    dt->hour = 3;
+    dt->minute = 30;
+    dt->second = 59;    
     #endif
 }
 
