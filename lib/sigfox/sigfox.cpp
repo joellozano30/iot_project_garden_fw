@@ -90,6 +90,12 @@ void sigfoxPackMsg(float humidity, float temperature, float battery, String *dat
 {
     uint8_t *floatPtr;
     String newHumByte, newTempByte, newBatByte;
+    int humidity_int, temperature_int, battery_int;
+
+    //Convert to 16 bits
+    humidity_int = (int)(humidity*10);
+    temperature_int = (int)(temperature*10);
+    battery_int = (int)(battery*10);
 
     *dataMsg = "AT$SF=";
 

@@ -30,6 +30,7 @@ float humidity_floor_print = 0;
 float temperature_print = 0;
 
 void mainSendSigfoxMessage(sigfox_msg_type msgType);
+void mainSendInitialSigfoxMessage(sigfox_msg_type msgType);
 
 void setup() {
 
@@ -45,10 +46,10 @@ void setup() {
   sigfoxReadInfo();
   delay(1000);
 
-  humidity_to_send = 0;
-  temperature_to_send = 0;
-  battery_to_send = 0;
-
+  humidity_to_send = 50;
+  temperature_to_send = 50;
+  battery_to_send = 50;
+  
   mainSendSigfoxMessage(BIDIR_MSG);
 
   start_time = millis();
@@ -121,7 +122,23 @@ void mainSendSigfoxMessage(sigfox_msg_type msgType){
     sigfoxSendBidirMsg(msgBuffer, rxBuffer);
     sigfoxParseResponse(rxBuffer);
   }
+}
 
+void mainSendInitialSigfoxMessage(sigfox_msg_type msgType){
+
+  String msgBuffer_ini = "AT$SF=100000000000000000000000";
+  Serial.print("[!] Message to Send: "); 
+  Serial.println(msgBuffer_ini); 
+
+  
+  if(msgType == UNIDIR_MSG){
+    sigfoxSendMsg(msgBuffer_ini);
+  }
+  else if(msgType == BIDIR_MSG)
+  {
+    sigfoxSendBidirMsg(msgBuffer_ini, rxBuffer);
+    sigfoxParseResponse(rxBuffer);
+  }
 }
 
 #ifdef TEST

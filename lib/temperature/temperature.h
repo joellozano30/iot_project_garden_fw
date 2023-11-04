@@ -4,12 +4,11 @@
     #include "Arduino.h"
     #include "Wire.h"
     #include "SHT31.h"
-#endif
+    
+#else
     #include "ArduinoFake.h"
     #include "Wire.h"
     using namespace fakeit;
-#ifndef TEST
-SHT31 sht;
 #endif
 
 #define SHT31_ADDRESS 0x44

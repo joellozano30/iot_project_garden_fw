@@ -13,5 +13,7 @@ float get_calc_percentage_humidity(){
     float percentage_humidity=map((long)humidity_measured, HUMEDAD_TIERRA, HUMEDAD_AGUA, 0, 100);
     if(percentage_humidity>100)
         percentage_humidity=100;
+    if(percentage_humidity < 0)
+        percentage_humidity=0;
     return percentage_humidity;
 }

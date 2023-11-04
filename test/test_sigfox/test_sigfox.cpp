@@ -16,9 +16,9 @@ void test_sigfoxPackMsg_should_PackMessagesCorrectly(){
     float humidity, temperature, battery;
     uint8_t *floatPtr;
 
-    humidity = 20.1; //4c779ac2
-    temperature = 23.5; //52b848c1
-    battery = 75.8; //b81ecd41
+    humidity = 20.1; //201
+    temperature = 23.5; //235
+    battery = 75.8; //758
 
     String MessageTopack;
     
@@ -26,7 +26,7 @@ void test_sigfoxPackMsg_should_PackMessagesCorrectly(){
 
     const char *MessageTopack_c = MessageTopack.c_str();
 
-    TEST_ASSERT_EQUAL_STRING("AT$SF=cdcca0410000bc419a999742",MessageTopack_c);
+    TEST_ASSERT_EQUAL_STRING("AT$SF=c900eb00f602",MessageTopack_c);
 }
 
 void test_sigfoxParseResponse_should_adaptArrayCorrectly(){

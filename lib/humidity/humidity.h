@@ -8,7 +8,7 @@
 #endif
 
 #define HUMIDITY_PIN A1
-#define HUMEDAD_TIERRA 117  
+#define HUMEDAD_TIERRA 91  
 #define HUMEDAD_AGUA 384
 
 void humidity_init(void);
