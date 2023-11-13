@@ -7,6 +7,7 @@
 #include "sigfox.h"
 #include "temperature.h"
 #include "humidity.h"
+#include "battery.h"
 #include "rtc.h"
 
 #define RX_BUFFER_SIZE 100
@@ -23,19 +24,21 @@ uint32_t start_time2;
 int num_data = 0;
 float humidity_floor = 0;
 float temperature = 0;
+float battery = 0;
 float humidity_to_send = 0;
 float temperature_to_send = 0;
 float battery_to_send = 0;
 float humidity_floor_print = 0;
 float temperature_print = 0;
+float battery_print = 0;
 
 void mainSendSigfoxMessage(sigfox_msg_type msgType);
-void mainSendInitialSigfoxMessage(sigfox_msg_type msgType);
 
 void setup() {
 
   Serial.begin(9600);
   humidity_init();
+  battery_init();
   sht_init();
   Serial.println("[*] Hello manito!"); 
   Serial.println("[*] Starting Sigfox Configuration"); 
@@ -49,7 +52,7 @@ void setup() {
   humidity_to_send = 50;
   temperature_to_send = 50;
   battery_to_send = 50;
-  
+
   mainSendSigfoxMessage(BIDIR_MSG);
 
   start_time = millis();
@@ -62,6 +65,7 @@ void setup() {
 
 void loop() {
 
+  //Only to see Current Time
   if((millis()-start_time) > ONE_SECOND){
     rtc_handler();
     rtc_show_time();
@@ -72,12 +76,16 @@ void loop() {
     Serial.println("[*] Calculating Parameters: ");
     humidity_floor_print = get_calc_percentage_humidity();
     temperature_print = get_temperature();
+    battery_print =  get_calc_percentage_battery();
     humidity_floor+= humidity_floor_print;
     temperature+=temperature_print;
+    battery+=battery_print;
     Serial.print("[*] Humidity: ");
     Serial.println(humidity_floor_print);
     Serial.print("[*] Temperature: ");
     Serial.println(temperature_print);
+    Serial.print("[*] Battery: ");
+    Serial.println(battery_print);
     start_time2 = millis();
     num_data++;
   }
@@ -89,11 +97,14 @@ void loop() {
     sigfoxInit();
     humidity_to_send = (uint16_t)humidity_floor/(float)num_data; //mean
     temperature_to_send = (uint16_t)temperature/(float)num_data; //mean
+    battery_to_send = (uint16_t)battery/(float)num_data; //mean
 
     Serial.print("[*] Humidity average: ");
     Serial.println(humidity_to_send);
     Serial.print("[*] Temperature average: ");
     Serial.println(temperature_to_send);
+    Serial.print("[*] Battery average: ");
+    Serial.println(battery_to_send);
 
     if(sx_get_dwnrec_flag())
       mainSendSigfoxMessage(UNIDIR_MSG);
@@ -103,6 +114,7 @@ void loop() {
     num_data = 0;
     humidity_floor = 0;
     temperature = 0;
+    battery = 0;
     sigfox_enter_sleep_mode();
   }
 
@@ -120,23 +132,6 @@ void mainSendSigfoxMessage(sigfox_msg_type msgType){
   else if(msgType == BIDIR_MSG)
   {
     sigfoxSendBidirMsg(msgBuffer, rxBuffer);
-    sigfoxParseResponse(rxBuffer);
-  }
-}
-
-void mainSendInitialSigfoxMessage(sigfox_msg_type msgType){
-
-  String msgBuffer_ini = "AT$SF=100000000000000000000000";
-  Serial.print("[!] Message to Send: "); 
-  Serial.println(msgBuffer_ini); 
-
-  
-  if(msgType == UNIDIR_MSG){
-    sigfoxSendMsg(msgBuffer_ini);
-  }
-  else if(msgType == BIDIR_MSG)
-  {
-    sigfoxSendBidirMsg(msgBuffer_ini, rxBuffer);
     sigfoxParseResponse(rxBuffer);
   }
 }
